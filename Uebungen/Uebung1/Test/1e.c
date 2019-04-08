@@ -1,4 +1,4 @@
-#define F_CPU 16000000L
+#define F_CPU 8000000L
 
 #include <avr/io.h>
 #include <util/delay.h>
@@ -12,28 +12,28 @@ void main (void)
     while (PIND & (1 << PD2))
     {
       PORTD = (1 << PD7) | (1 << PD5);
-      _delay_ms(1000);
+      _delay_ms(0.1);
       PORTD = (1 << PD5);
-      _delay_ms(1000);
+      _delay_ms(0.1);
     }
 
     while (PIND & (1 << PD3))
     {
       PORTD = (1 << PD7) | (1 << PD5);
-      _delay_ms(500);
+      _delay_ms(0.5);
       PORTD = (1 << PD5);
-      _delay_ms(500);
+      _delay_ms(0.5);
     }
 
     while (PIND & (1 << PD4))
     {
       PORTD = (1 << PD7) | (1 << PD5);
-      _delay_ms(100);
+      _delay_ms(10);
       PORTD = (1 << PD5);
-      _delay_ms(100);
+      _delay_ms(10);
     }
 
     PORTD = 0;
-    _delay_ms(20);
+    _delay_ms(2);
   }
 }

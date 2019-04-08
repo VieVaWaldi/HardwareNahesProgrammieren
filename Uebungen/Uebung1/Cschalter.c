@@ -9,16 +9,16 @@ void main(void)
     
     int pressed = 0;
 
-    DDRD = (1<<PD5);
+    DDRD = (1<<PD6) | (1<<PD5);
 
     while(1) 
     {  
         while(PIND & (1<<PD2)) 
         {
-            PORTD = (1<<PD5);
+            PORTD = (1<<PD5) | (0<<PD6);
             _delay_ms(10);
         } 
-        PORTD = 0;
+        PORTD = (1<<PD6) | (0<<PD5);
         _delay_ms(10);
     }
 }
