@@ -8,7 +8,7 @@
  */
 
 #define F_CPU 16000000L
-#define pause 1
+#define pause 1000
 
 #include <avr/io.h>
 #include <util/delay.h>
@@ -16,7 +16,7 @@
 void main (void)              // Am Mikroprozessor bekommt man sowieso keine Werte uebergeben
 {
   // PD5 = LED1
-  DDRD = (1 << PD5);          // Schalte bei LED1 auf Output, DDRD = Datenregister D
+  DDRD = (1 << PD5);          // Schalte bei LED1 auf Output, DDRD = DatenRichtungsRegister D
 
   while (1)
   {

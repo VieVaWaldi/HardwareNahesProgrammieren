@@ -356,3 +356,52 @@ zusaetzlich: Bei Verkettung von logischen und/oder kann Auswertung abgebrochen w
   Ist `(1 << URSEL)` dann wird auf UCSRC geschrieben, sonst wird UBRRH verwendet (R/W).
   Soll UCSRC gelesen werden, dann muss erst UBRRH und dann im naechsten Zyklus UCSRC gelesen werden.
   Dies MUSS eine atomare Operation sein. (Interrupts sollten hier deaktiviert sein)
+
+```
+stdio.h //verwenden mit avr:
+File *fp = FDEV_SETUP_STREAM(...); //stdout
+```
+
+
+=== Interrupts - Unterbrechungsanforderungen
+-
+
+
+* Globales Interrupt Enable Bit (Status Register, I-bit)
+* Jeder Interrupt hat individuelles enable bit, sowie einen separaten Interrupt-Vector und ein Interrupt-Flag, welches das Auftreten signalisiert.
+* Liste der Interrupt-Vektoren belegt niedrigste Adresse im Program-Space. Die Reihenfolge der Listeneintraege impliziert eine Prioritaet. (Kleine Adresse -> hohe Prioritaet)
+* Ablauf der Interruptbehandlung:
+0. Interrupt tritt auf (service routine wird ausgefuehrt)
+1. GIE wird disabled (kann softwareseitig wieder auf 1 gesetzt werden, um "nested Interrupts" zu erlauben)
+2. Interrupt-Routine wird ausgefuehrt
+3. bei Rueckkehr (RETI) wird das GIE automatisch wieder auf 1 gesetzt.
+
+* Zwei Arten von Interrupts:
+ 1. "Event-gesteuert", Interrupt-Flog wird durch Ereingnis gesetzt, der Programmzaehler wird zur Interrupt-Routine verschoben (vectoring) das Interrupt-Flag wird autom. geloaescht. (Interrupt-Flogs koennen auch geloescht werden, indem eine 1 geschrieben wird)
+ Treten Interrupts auf, waehrend GIE oder Interrupt-Enable-Bit geloaescht sind, so wird das zugehoerige Interrupt-Flag gesetzt und der Handler dann ausgefuehrt, wenn das Enable-Bit wieder gesetzt ist.
+  -> Es sei denn, das Flag wird vorher softwareseitig geloescht.
+ 2. "Level-gesteuerte" Interrupts beduerfen keiner Flags (koennen aber eines haben).
+ So lange eine Interrupt-Bedingung erfuellt ist, wird der Interrupt-Vector ausgefuehrt, falls dieser Enabled ist.
+ Verschwindet die Bedingung bevor der Interrupt aktiviert wird, so wird dieser nicht behandelt. ("kein Aufheben")
+
+* Nach Behandlung eines Interrupt wird die MCU stets zum Hauptprogramm zurueckkehren und eine weitere Instruktion ausfuehren, ehe der naechste Interrupt behandelt werden kann.
+* Bemerkung:
+  * Dax Statusregister (der ALU) wird *nicht* autom. gespeichert und wiederhergestellt.
+  * Die CLI Instruktion deaktiviert Interrupts sofort.
+  * Die erste Instruktion nach der SEI-Instruktion wird immer ausgefuehrt, bevor der erste Interrupt behandelt werden kann.
+* Reset: External Pin, Power-On, Brown-Out (zu lang zu wenig spannung), Watchdog, JTAG-Reset
+* External Interrupt Request 0, 1, 2
+* USART: Receive Complete, Data Register Empty, Transfer Complete
+* EEPROM Ready, Analog Comparator, Two Wire Serial Interface (i2e), Store Program Memory Ready.
+
+= Externe Interrupts
+-
+* Asynchron: Low-Level (INT 0,1) und Int 2 (Flankengesteuert)
+   * typischer Einsatz: Aufwecken aus Sleep-Mode (I/O-Clock angehalten)
+    * Ausnahme: Idle-Mode (I/O-Clock running)
+   * Anstand zweier Flanken mid. 50ns (Pulsweite)
+   * Bem:
+    * Wurde ein Interrupt detektiert, wird das zugehoerige Flag gesetzt.
+    * Sind das Enable Bit des jeweiligen Interrupt (GICR) und das GLobal Interrupt Enable Bit (SREG) gesetzt, so wird die Interrupt-Routine ausgefuehrt.
+    * Das Flag wird automatisch geloescht, wenn die Interrupt-Routine zurueckkehrt (RETI)
+    * Das Flag kann jederzeit durch schreiben einer logischen 1 geloescht werden.
